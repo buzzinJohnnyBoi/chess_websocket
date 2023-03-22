@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Chess</title>
+	<style>
+		* {
+			margin: 0;
+			padding: 0;
+		}
+		img {
+			width: 50px;
+            display: none;
+		}
+        canvas {
+            position: absolute;
+        }
+	</style>
+    <script src="https://cdn.socket.io/socket.io-3.0.0.js"></script>
+    <!-- <script type="module" defer src="app.js"></script> -->
+</head>
+<body oncontextmenu="rightclick(); return false">
+    <canvas></canvas>
+    <img src="pieces/blackPawn.png" id="blackPawn">
+    <img src="pieces/blackKnight.png" id="blackKnight">
+    <img src="pieces/blackBishop.png" id="blackBishop">
+    <img src="pieces/blackRook.png" id="blackRook">
+    <img src="pieces/blackQueen.png" id="blackQueen">
+    <img src="pieces/blackKing.png" id="blackKing">
+    <img src="pieces/whitePawn.png" id="whitePawn">
+    <img src="pieces/whiteKnight.png" id="whiteKnight">
+    <img src="pieces/whiteBishop.png" id="whiteBishop">
+    <img src="pieces/whiteRook.png" id="whiteRook">
+    <img src="pieces/whiteQueen.png" id="whiteQueen">
+    <img src="pieces/whiteKing.png" id="whiteKing">
+</body>
+<!-- <script type="module" src="game/components/mouse.js"></script> -->
+<script type="module" src="game/main.js"></script>
+</html>
