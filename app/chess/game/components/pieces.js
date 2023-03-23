@@ -13,7 +13,7 @@ export default class piece {
     static getMoves(id, row, col, board, prevboard) {
         for (let i = 0; i < pieces.length; i++) {
             if(pieces[i].id == id) {
-                console.log(moves[pieces[i].type](id, row, col, board, prevboard));
+                return moves[pieces[i].type](id, row, col, board, prevboard);
             }
         }
     }

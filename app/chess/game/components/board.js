@@ -65,18 +65,20 @@ export class board {
     onrelease(x, y) {
         if(this.selectedPiece != null) {
             const sqaure = this.findSquare(x, y);
-            this.prevboard = this.board;
+            const a = this.board.slice();
+            this.prevboard = this.board.slice();
+            console.log(a)
             this.board[this.selectedPiece.col][this.selectedPiece.row] = 0;
             this.board[sqaure.col][sqaure.row] = this.selectedPiece.id;
             this.selectedPiece.newrow = sqaure.row;
             this.selectedPiece.newcol = sqaure.col;
-            move(this.selectedPiece);
+            // move(this.selectedPiece);
             this.selectedPiece = null;
         }
     }
     moveP(row, col, id, newrow, newcol) {
-        this.board[col][row] = 0;
-        this.board[newcol][newrow] = id;
+        // this.board[col][row] = 0;
+        // this.board[newcol][newrow] = id;
     }
     setBack() {
         if(this.selectedPiece != null) {

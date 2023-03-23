@@ -13,6 +13,11 @@ export class draw {
             }
         }
         if(selectedPiece != null) {
+            for (let i = 0; i < selectedPiece.moves.length; i++) {
+                const m = selectedPiece.moves[i];
+                ctx.fillStyle = "rgba(20, 20, 20, 0.5)";
+                ctx.fillRect(m.row * size.w, m.col * size.h, size.w, size.h);
+            }
             this.Piece(selectedPiece.id, size, selectedPiece.y/size.h, selectedPiece.x/size.w, ctx);
         }
     }
