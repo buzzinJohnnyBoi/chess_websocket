@@ -11,7 +11,7 @@ export class board {
             color2
         ];
         this.board = setup;
-        this.prevboard = setup;
+        this.lastMove = null;
         this.selectedPiece = null;
     }
     update(renderer, ctx, vw, vh, mx, my) {
@@ -57,7 +57,7 @@ export class board {
                     row: sqaure.row,
                     col: sqaure.col,
                     id: piece,
-                    moves: Piece.getMoves(piece, sqaure.row, sqaure.col, this.board, this.prevboard)
+                    moves: Piece.getMoves(piece, sqaure.row, sqaure.col, this.board, this.lastMove)
                 }
             }
         }
@@ -65,9 +65,14 @@ export class board {
     onrelease(x, y) {
         if(this.selectedPiece != null) {
             const sqaure = this.findSquare(x, y);
-            const a = this.board.slice();
-            this.prevboard = this.board.slice();
-            console.log(a)
+            this.lastMove = {
+                id: this.selectedPiece.id,
+                orgRow: this.selectedPiece.row,
+                orgCol: this.selectedPiece.col,
+                row: sqaure.row,
+                col: sqaure.col,
+            };
+            console.log(this.lastMove)
             this.board[this.selectedPiece.col][this.selectedPiece.row] = 0;
             this.board[sqaure.col][sqaure.row] = this.selectedPiece.id;
             this.selectedPiece.newrow = sqaure.row;

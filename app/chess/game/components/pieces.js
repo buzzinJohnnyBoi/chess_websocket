@@ -10,17 +10,17 @@ export default class piece {
         }
         return false;
     }
-    static getMoves(id, row, col, board, prevboard) {
+    static getMoves(id, row, col, board, lastMove) {
         for (let i = 0; i < pieces.length; i++) {
             if(pieces[i].id == id) {
-                return moves[pieces[i].type](id, row, col, board, prevboard);
+                return moves[pieces[i].type](id, row, col, board, lastMove);
             }
         }
     }
 }
 
 
-const pieces = [
+export const pieces = [
     //white pieces
     {
         id: 1,
