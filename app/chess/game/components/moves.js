@@ -162,30 +162,33 @@ export class moves {
         return true;
     }
     static legalMoves(moves, board, id, row, col) {
-        // var legalmoves = [];
-        // for (let i = 0; i < moves.length; i++) {
-        //     const move = moves[i];
-        //     board[move.col][move.row] = id;
-        //     board[col][row] = 0;
-        //     for (let i = 0; i < board.length; i++) {
-        //         for (let j = 0; j < board[i].length; j++) {
-        //             const sqaure = board[i][j];
-        //             if(sqaure != 0 && this.oppoSide(sqaure, id)) {
+        var legalmoves = [];
+        for (let i = 0; i < moves.length; i++) {
+            const move = moves[i];
+            const oldSqaure = board[move.col][move.row];
+            board[move.col][move.row] = id;
+            board[col][row] = 0;
+            for (let i = 0; i < board.length; i++) {
+                for (let j = 0; j < board[i].length; j++) {
+                    const sqaure = board[i][j];
+                    if(sqaure != 0 && this.oppoSide(sqaure, id)) {
 
-        //                 for (let i = 0; i < pieces.length; i++) {
-        //                     if(pieces[i].id == id) {
-        //                         const oppoMoves = this[pieces[i].type](id, , i, board, lastMove);
-        //                     }
-        //                 }
-        //                 // this[pieces[i].type](id, row, col, board, lastMove);
+                        for (let i = 0; i < pieces.length; i++) {
+                            if(pieces[i].id == id) {
+                                const oppoMoves = this[pieces[i].type](id, j, i, board, {row: move.row, col: move.col});
+
+                                break;
+                            }
+                        }
+                        // this[pieces[i].type](id, row, col, board, lastMove);
                         
-        //             }
-        //         }
-        //     }
-        //     board[col][row] = id;
-        //     board[move.col][move.row] = 0;
-        //     legalmoves.push(move);
-        // }
-        // return legalmoves;
+                    }
+                }
+            }
+            board[col][row] = id;
+            board[move.col][move.row] = oldSqaure;
+            legalmoves.push(move);
+        }
+        return legalmoves;
     }
 }
