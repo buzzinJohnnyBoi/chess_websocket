@@ -168,16 +168,20 @@ export class moves {
             const oldSqaure = board[move.col][move.row];
             board[move.col][move.row] = id;
             board[col][row] = 0;
-            for (let i = 0; i < board.length; i++) {
+            let LM = true;
+            const kingLocation = this.findKing(board, id);
+            Loop: for (let i = 0; i < board.length; i++) {
                 for (let j = 0; j < board[i].length; j++) {
                     const sqaure = board[i][j];
                     if(sqaure != 0 && this.oppoSide(sqaure, id)) {
 
                         for (let i = 0; i < pieces.length; i++) {
                             if(pieces[i].id == id) {
-                                const oppoMoves = this[pieces[i].type](id, j, i, board, {row: move.row, col: move.col});
-
-                                break;
+                                if(this[pieces[i].type + "Move"](id, j, i, kingLocation.row, kingLocation.col, board)) {
+                                    LM = false;
+                                    console.log("asdf")
+                                    break Loop;
+                                }
                             }
                         }
                         // this[pieces[i].type](id, row, col, board, lastMove);
@@ -185,10 +189,86 @@ export class moves {
                     }
                 }
             }
+            if(LM) {
+                legalmoves.push(move)
+            }
             board[col][row] = id;
             board[move.col][move.row] = oldSqaure;
-            legalmoves.push(move);
         }
         return legalmoves;
     }
+    static findKing(board, id) {
+        for (let i = 0; i < board.length; i++) {
+            for (let j = 0; j < board[i].length; j++) {
+                if(Math.abs(board[i][j]) == 6 &&  id * board[i][j] > 0) {
+                    return {row: j, col: i}
+                }                
+            }
+        }
+    }
+    static pawnMove(dir, row, col, kingRow, kingCol) {
+        if(Math.abs(kingRow - row) == 1 && col - dir == kingCol) {
+            return true;
+        }
+        return false;
+    }
+    static knightMove(id, row, col, kingRow, kingCol) {
+        if((Math.abs(row - kingRow) == 1 && Math.abs(col - kingCol) == 2) || (Math.abs(row - kingRow) == 2 && Math.abs(col - kingCol) == 1)) {
+            return true;
+        }
+        return false;
+    }
+    static bishopMove(id, row, col, kingRow, kingCol, board) {
+        if(Math.abs(col - kingCol) == Math.abs(row - kingRow)) {
+            const moveVec = {x: (row - kingRow)/Math.abs(col - kingCol), y: (col - kingCol)/Math.abs(col - kingCol)}
+            for (let i = 1; i < Math.abs(row - kingRow); i++) {
+                if(board[col - moveVec.y * i][row - moveVec.x * i] != 0) {
+                    return false;
+                }
+            }
+            return true;
+        }
+        return false;
+    }
+    // hello future me the prob is board[col - moveVec.y * i] equal to 9
+    static rookMove(id, row, col, kingRow, kingCol, board) {
+        if(col == kingCol || row == kingRow) {
+            const moveVec = (col === kingCol) ? { x: (row - kingRow)/Math.abs(row - kingRow), y: 0 } : { x: 0, y: (col - kingCol)/Math.abs(col - kingCol) };
+            const limit = (col === kingCol) ? Math.abs(row - kingRow) : Math.abs(col - kingCol);
+            for (let i = 1; i < limit; i++) {
+                console.log(col - moveVec.y * i)
+                if(board[col - moveVec.y * i][row - moveVec.x * i] != 0) {
+                    return false;
+                }
+            }
+            return true;
+        }
+        return false;
+    }
+    static queenMove(id, row, col, kingRow, kingCol, board) {
+        if(this.bishopMove(id, row, col, kingRow, kingCol, board) || this.rookMove(id, row, col, kingRow, kingCol, board)) {
+            return true;
+        }
+        return false;
+    }
+    static kingMove(id, row, col, kingRow, kingCol, board) {
+        if(Math.abs(row - kingRow) <= 1 && Math.abs(col - kingCol) <= 1) {
+            return true;
+        }
+    }
 }
+
+const board = [
+    [0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, -6],
+    [0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 2, 3, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 1, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0],
+]
+
+console.log(moves.rookMove(4, 4, 4, 7, board));
+
+  
