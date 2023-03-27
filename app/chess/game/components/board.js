@@ -1,5 +1,7 @@
 import {draw} from "./draw.js";
 import Piece from "./pieces.js";
+import {pieces} from "./pieces.js";
+
 export class board {
     constructor(rows, cols, color1, color2, setup) {
         this.w = 0;
@@ -13,6 +15,46 @@ export class board {
         this.board = setup;
         this.lastMove = null;
         this.selectedPiece = null;
+        this.castlingValues = this.castlingVals(setup);
+    }
+
+    castlingVals(setUp) {
+        const kingId = this.findPieceId("king");
+        const rookId = this.findPieceId("rook");
+        let white = [];
+        let black = [];
+        for (let i = 0; i < setUp.length; i++) {
+            for (let j = 0; j < setUp[i].length; j++) {
+                const sqaure = setUp[i][j];
+                if(Math.abs(sqaure) == kingId) {
+                    if (sqaure < 0) {
+                        black.push({type: "king", row: j, col: i, moved: false});
+                    }
+                    else {
+                        white.push({type: "king", row: j, col: i, moved: false});
+                    }
+                }
+                else if(Math.abs(sqaure) == rookId) {
+                    if (sqaure < 0) {
+                        black.push({type: "rook", row: j, col: i, moved: false});
+                    }
+                    else {
+                        white.push({type: "rook", row: j, col: i, moved: false});
+                    }
+                }
+            }
+        }
+        return {
+            "white": white,
+            "black": black,
+        }
+    }
+    findPieceId(name) {
+        for (let i = 0; i < pieces.length; i++) {
+            if(pieces[i].type == name) {
+                return pieces[i].id;
+            }
+        }
     }
     update(renderer, ctx, vw, vh, mx, my) {
         if(vh < vw) {
@@ -57,7 +99,7 @@ export class board {
                     row: sqaure.row,
                     col: sqaure.col,
                     id: piece,
-                    moves: Piece.getMoves(piece, sqaure.row, sqaure.col, this.board, this.lastMove)
+                    moves: Piece.getMoves(piece, sqaure.row, sqaure.col, this.board, this.lastMove, this.castlingValues)
                 }
             }
         }
@@ -65,21 +107,63 @@ export class board {
     onrelease(x, y) {
         if(this.selectedPiece != null) {
             const sqaure = this.findSquare(x, y);
-            this.lastMove = {
-                id: this.selectedPiece.id,
-                orgRow: this.selectedPiece.row,
-                orgCol: this.selectedPiece.col,
-                row: sqaure.row,
-                col: sqaure.col,
-            };
-            console.log(this.lastMove)
-            this.board[this.selectedPiece.col][this.selectedPiece.row] = 0;
-            this.board[sqaure.col][sqaure.row] = this.selectedPiece.id;
-            this.selectedPiece.newrow = sqaure.row;
-            this.selectedPiece.newcol = sqaure.col;
-            // move(this.selectedPiece);
-            this.selectedPiece = null;
+            const move = this.moveInMoves(sqaure.row, sqaure.col);
+            if(move !== false) {
+                this.lastMove = {
+                    id: this.selectedPiece.id,
+                    orgRow: this.selectedPiece.row,
+                    orgCol: this.selectedPiece.col,
+                    row: sqaure.row,
+                    col: sqaure.col,
+                };
+                if(move.extra != null) {
+                    if(move.extra.type == "move") {
+                        this.board[move.extra.moveCol][move.extra.moveRow] = this.board[move.extra.col][move.extra.row];
+                        this.board[move.extra.col][move.extra.row] = 0;
+                    }
+                    else if(move.extra.type == "take") {
+                        this.board[move.extra.col][move.extra.row] = 0;
+                    }
+                    console.log(move.extra)
+                }
+                this.board[this.selectedPiece.col][this.selectedPiece.row] = 0;
+                this.board[sqaure.col][sqaure.row] = this.selectedPiece.id;
+                this.selectedPiece.newrow = sqaure.row;
+                this.selectedPiece.newcol = sqaure.col;
+                if(Math.abs(this.selectedPiece.id) == this.findPieceId("king")) {
+                    const vals = (this.selectedPiece.id > 0) ? this.castlingValues["white"] : this.castlingValues["black"];
+                    for (let i = 0; i < vals.length; i++) {
+                        if(vals[i].type == "king") {
+                            vals[i].moved = true;
+                            break;
+                        }
+                    }
+                }
+                if(Math.abs(this.selectedPiece.id) == this.findPieceId("rook")) {
+                    const vals = (this.selectedPiece.id > 0) ? this.castlingValues["white"] : this.castlingValues["black"];
+                    for (let i = 0; i < vals.length; i++) {
+                        if(vals[i].type == "rook") {
+                            if(sqaure.row == vals[i].row && sqaure.col == vals[i].col) {
+                                vals[i].moved = true;
+                            }
+                        }
+                    }
+                }
+                // move(this.selectedPiece);
+                this.selectedPiece = null;
+            }
+            else {
+                this.setBack();
+            }
         }
+    }
+    moveInMoves(row, col) {
+        for (let i = 0; i < this.selectedPiece.moves.length; i++) {
+            if(this.selectedPiece.moves[i].row == row && this.selectedPiece.moves[i].col == col) {
+                return this.selectedPiece.moves[i];
+            }
+        }
+        return false;
     }
     moveP(row, col, id, newrow, newcol) {
         // this.board[col][row] = 0;

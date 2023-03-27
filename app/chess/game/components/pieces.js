@@ -10,10 +10,15 @@ export default class piece {
         }
         return false;
     }
-    static getMoves(id, row, col, board, lastMove) {
+    static getMoves(id, row, col, board, lastMove, castlingVals) {
         for (let i = 0; i < pieces.length; i++) {
             if(pieces[i].id == id) {
-                return moves.legalMoves(moves[pieces[i].type](id, row, col, board, lastMove), board, id, row, col);
+                if(pieces[i].type == "king") {
+                    return moves[pieces[i].type](id, row, col, board, lastMove, castlingVals);
+                }
+                else {
+                    return moves[pieces[i].type](id, row, col, board, lastMove);
+                }
             }
         }
     }
@@ -62,37 +67,50 @@ export const pieces = [
     {
         id: -1,
         type: "pawn",
-        color: "white",
+        color: "black",
         image: document.querySelector("#blackPawn"),
     },
     {
         id: -2,
         type: "knight",
-        color: "white",
+        color: "black",
         image: document.querySelector("#blackKnight"),
     },
     {
         id: -3,
         type: "bishop",
-        color: "white",
+        color: "black",
         image: document.querySelector("#blackBishop"),
     },
     {
         id: -4,
         type: "rook",
-        color: "white",
+        color: "black",
         image: document.querySelector("#blackRook"),
     },
     {
         id: -5,
         type: "queen",
-        color: "white",
+        color: "black",
         image: document.querySelector("#blackQueen"),
     },
     {
         id: -6,
         type: "king",
-        color: "white",
+        color: "black",
         image: document.querySelector("#blackKing"),
     },
 ]
+
+const board = [
+    [0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0],
+    [-1, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0],
+    [0, -3, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 1, 0, 0, 0],
+    [0, 0, 0, 6, 0, 0, 0, 0],
+]
+
+console.log(moves.legalMove(1, {row: 4, col: 6}, {row: 4, col: 5}, board));

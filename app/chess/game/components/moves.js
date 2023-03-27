@@ -9,35 +9,25 @@ export class moves {
         const pawnvals = this.pawnData(dir, b.rows, b.cols);
         var moves = [];
         if(board[col - dir][row] == 0) {
-            moves.push({row: row, col: col - dir});
+            this.addMove(moves, dir, {row: row, col: col}, {row: row, col: col - dir}, board);
             if(col == pawnvals.startCol && board[col - dir * 2][row] == 0) {
-                moves.push({row: row, col: col - dir * 2});
+                this.addMove(moves, dir, {row: row, col: col}, {row: row, col: col - dir * 2}, board);
             }
         }
         let s = board[col - dir][row - 1];
         if(s != 0 && this.oppoSide(dir, s)) {
-            moves.push({row: row - 1, col: col - dir});
+            this.addMove(moves, dir, {row: row, col: col}, {row: row - 1, col: col - dir}, board);
         }
         s = board[col - dir][row + 1];
         if(s != 0 && this.oppoSide(dir, s)) {
-            moves.push({row: row + 1, col: col - dir});
+            this.addMove(moves, dir, {row: row, col: col}, {row: row + 1, col: col - dir}, board);
         }
         s = board[col][row - 1];
 
         let oppoPawnVals = this.pawnData(dir * -1, b.rows, b.cols);
-        // console.log(-s == dir);
-        // console.log(col == oppoPawnVals.enPassentCol);
-        // console.log(prevboard[col][row - 1] == 0);
-        // console.log(prevboard);
-        // if(-s == dir && col == oppoPawnVals.enPassentCol && prevboard[col][row - 1] == 0 && prevboard[col + dir][row - 1] == 0) {
-        //     moves.push({row: row - 1, col: col - dir});
-        // }
         if(lastMove != null) {
-            // console.log(lastMove.id == -dir)
-            // console.log(lastMove.orgCol + dir * 2)
-            // console.log(Math.abs(col - lastMove.col))
             if(lastMove.id == -dir && lastMove.orgCol + dir * 2 == lastMove.col && col == oppoPawnVals.enPassentCol && Math.abs(row - lastMove.row) == 1) {
-                moves.push({row: lastMove.row, col: lastMove.orgCol + dir, extra: {type: "take", row: lastMove.row, col: lastMove.col}})
+                this.addMove(moves, dir, {row: row, col: col}, {row: lastMove.row, col: lastMove.orgCol + dir, extra: {type: "take", row: lastMove.row, col: lastMove.col}}, board);
             }
         }
 
@@ -50,7 +40,7 @@ export class moves {
             const x = row + offsetsKnight[i][0];
             const y = col + offsetsKnight[i][1];
             if(this.onBoard(x, y, board) && (this.oppoSide(board[y][x], id) || board[y][x] == 0)) {
-                moves.push({row: x, col: y})
+                this.addMove(moves, id, {row: row, col: col}, {row: x, col: y}, board);
             }
         }
         return moves;
@@ -65,10 +55,10 @@ export class moves {
             while(!offBoard) {
                 if(this.onBoard(r, c, board)) {
                     if(board[c][r] == 0) {
-                        moves.push({row: r, col: c});
+                        this.addMove(moves, id, {row: row, col: col}, {row: r, col: c}, board);
                     }
                     else if(this.oppoSide(id, board[c][r])) {
-                        moves.push({row: r, col: c});
+                        this.addMove(moves, id, {row: row, col: col}, {row: r, col: c}, board);
                         offBoard = true;
                     }
                     else {
@@ -94,10 +84,10 @@ export class moves {
             while(!offBoard) {
                 if(this.onBoard(r, c, board)) {
                     if(board[c][r] == 0) {
-                        moves.push({row: r, col: c});
+                        this.addMove(moves, id, {row: row, col: col}, {row: r, col: c}, board);
                     }
                     else if(this.oppoSide(id, board[c][r])) {
-                        moves.push({row: r, col: c});
+                        this.addMove(moves, id, {row: row, col: col}, {row: r, col: c}, board);
                         offBoard = true;
                     }
                     else {
@@ -118,17 +108,44 @@ export class moves {
         const bishopMoves = this.bishop(id, row, col, board);
         return rookMoves.concat(bishopMoves);
     }
-    static king(id, row, col, board) {
+    static king(id, row, col, board, lastMove, castlingVals) {
         const offsetsKing = [[1, 1], [1, 0], [1, -1], [0, 1], [0, -1], [-1, 1], [-1, 0], [-1, -1]];
         var moves = [];
         for (var i = 0; i < offsetsKing.length; i++) {
             const x = row + offsetsKing[i][0];
             const y = col + offsetsKing[i][1];
             if(this.onBoard(x, y, board) && (this.oppoSide(board[y][x], id) || board[y][x] == 0)) {
-                moves.push({row: x, col: y})
+                this.addMove(moves, id, {row: row, col: col}, {row: x, col: y}, board);
             }
         }
+        //Castling
+        if(!this.inCheck(id, board) && board[col][row + 1] == 0 && board[col][row + 2] == 0 && board[col][row + 3] * id == 24 && !this.kingOrRookMoved(id, row + 3, col, castlingVals)) {
+            if(this.legalMove(id, {row: row, col: col}, {row: row + 1, col: col}, board)) {
+                this.addMove(moves, id, {row: row, col: col}, {row: row + 2, col: col, extra: {type: "move", row: row + 3, col: col, moveRow: row + 1, moveCol: col}}, board);
+            }
+        }
+        if(!this.inCheck(id, board) && board[col][row - 1] == 0 && board[col][row - 2] == 0 && board[col][row - 4] * id == 24  && !this.kingOrRookMoved(id, row - 4, col, castlingVals)) {
+            if(this.legalMove(id, {row: row, col: col}, {row: row - 1, col: col}, board)) {
+                this.addMove(moves, id, {row: row, col: col}, {row: row - 2, col: col, extra: {type: "move", row: row - 4, col: col, moveRow: row - 1, moveCol: col}}, board);
+            }
+        }
+        console.log(castlingVals)
         return moves;
+    }
+    static kingOrRookMoved(id, row, col, castlingVals) {
+        const vals = (id > 0) ? castlingVals["white"] : castlingVals["black"];
+        for (let i = 0; i < vals.length; i++) {
+            const obj = vals[i];
+            if(obj.type == "king" && obj.moved) {
+                return true;
+            }
+            else {
+                if(row == obj.row && col == obj.col && obj.moved) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
     //---
     static pawnData(id, rows, cols) {
@@ -161,41 +178,54 @@ export class moves {
         }
         return true;
     }
-    static legalMoves(moves, board, id, row, col) {
-        var legalmoves = [];
-        for (let i = 0; i < moves.length; i++) {
-            const move = moves[i];
-            const oldSqaure = board[move.col][move.row];
-            board[move.col][move.row] = id;
-            board[col][row] = 0;
-            let LM = true;
-            const kingLocation = this.findKing(board, id);
-            Loop: for (let i = 0; i < board.length; i++) {
-                for (let j = 0; j < board[i].length; j++) {
-                    const sqaure = board[i][j];
-                    if(sqaure != 0 && this.oppoSide(sqaure, id)) {
+    static addMove(moveArr, id, curpos, move, board) {
+        if(this.legalMove(id, curpos, move, board)) {
+            moveArr.push(move);
+        }
+    }
+    static legalMove(id, curpos, move, board) {
+        const tempTake = board[move.col][move.row];
+        board[move.col][move.row] = id;
+        board[curpos.col][curpos.row] = 0;
+        if(move.extra != null) {
+            if(move.type = "take") {
+                var extraTake = board[move.extra.col][move.extra.row];
+                board[move.extra.col][move.extra.row] = 0;
+            }
+        }
+        if(this.inCheck(id, board)) {
+            board[curpos.col][curpos.row] = id;
+            board[move.col][move.row] = tempTake;
+            if(extraTake != null) {
+                board[move.extra.col][move.extra.row] = extraTake;
+            }
+            return false;
+        }
+        board[curpos.col][curpos.row] = id;
+        board[move.col][move.row] = tempTake;
+        if(extraTake != null) {
+            board[move.extra.col][move.extra.row] = extraTake;
+        }
+        return true;
+    }
+    static inCheck(id, board) {
+        const kingLocation = this.findKing(board, id);
+        for (let i = 0; i < board.length; i++) {
+            for (let j = 0; j < board[i].length; j++) {
+                const sqaure = board[i][j];
+                if(sqaure != 0 && this.oppoSide(sqaure, id)) {
 
-                        for (let i = 0; i < pieces.length; i++) {
-                            if(pieces[i].id == id) {
-                                if(this[pieces[i].type + "Move"](id, j, i, kingLocation.row, kingLocation.col, board)) {
-                                    LM = false;
-                                    console.log("asdf")
-                                    break Loop;
-                                }
+                    for (let k = 0; k < pieces.length; k++) {
+                        if(pieces[k].id == sqaure) {
+                            if(this[pieces[k].type + "Move"](sqaure, j, i, kingLocation.row, kingLocation.col, board)) {
+                                return true;
                             }
                         }
-                        // this[pieces[i].type](id, row, col, board, lastMove);
-                        
                     }
                 }
             }
-            if(LM) {
-                legalmoves.push(move)
-            }
-            board[col][row] = id;
-            board[move.col][move.row] = oldSqaure;
         }
-        return legalmoves;
+        return false;
     }
     static findKing(board, id) {
         for (let i = 0; i < board.length; i++) {
@@ -236,7 +266,6 @@ export class moves {
             const moveVec = (col === kingCol) ? { x: (row - kingRow)/Math.abs(row - kingRow), y: 0 } : { x: 0, y: (col - kingCol)/Math.abs(col - kingCol) };
             const limit = (col === kingCol) ? Math.abs(row - kingRow) : Math.abs(col - kingCol);
             for (let i = 1; i < limit; i++) {
-                console.log(col - moveVec.y * i)
                 if(board[col - moveVec.y * i][row - moveVec.x * i] != 0) {
                     return false;
                 }
@@ -258,17 +287,6 @@ export class moves {
     }
 }
 
-const board = [
-    [0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, -6],
-    [0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 2, 3, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 1, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0],
-]
 
-console.log(moves.rookMove(4, 4, 4, 7, board));
 
   
