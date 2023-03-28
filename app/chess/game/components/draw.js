@@ -24,5 +24,24 @@ export class draw {
     static Piece(piece, size, col, row, ctx) {
         ctx.drawImage(Piece.getDrawImage(piece), size.w * row, size.h * col, size.w, size.h);
     }
+    static promoteScreen(row, col, size, color, ctx, idArr, reverseDraw = false) {
+        const height = idArr.length * size.h;
+        ctx.fillStyle = color;
+        if(!reverseDraw) {
+            ctx.fillRect(row * size.w, col * size.h, size.w, height);
+        }
+        else {
+            ctx.fillRect(row * size.w, (col + 1) * size.h, size.w, -height);
+        }
+        for (let i = 0; i < idArr.length; i++) {
+            const piece = idArr[i];
+            if(!reverseDraw) {
+                this.Piece(piece, size, col + i, row, ctx);
+            }
+            else {
+                this.Piece(piece, size, col - i, row, ctx);
+            }
+        }
+    }
 }
 

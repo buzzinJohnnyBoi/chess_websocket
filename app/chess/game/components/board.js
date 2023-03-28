@@ -16,6 +16,9 @@ export class board {
         this.lastMove = null;
         this.selectedPiece = null;
         this.castlingValues = this.castlingVals(setup);
+        this.promotingVals = {
+            promoting: false,
+        }
     }
 
     castlingVals(setUp) {
@@ -76,6 +79,9 @@ export class board {
             this.selectedPiece.x = clamp(0, this.w - size/this.rows, mx - size/(2 * this.rows));
             this.selectedPiece.y = clamp(0, this.h - size/this.cols, my - size/(2 * this.cols));
         }
+        if(this.promotingVals.promoting) {
+            draw.promoteScreen(this.promotingVals.row, this.promotingVals.col, {w: size/this.rows, h: size/this.cols}, this.promotingVals.color, ctx, this.promotingVals.pieceId, (this.promotingVals.col === 0) ? false : true);
+        }
     }
     draw(ctx) {
         const w = this.w/this.rows;
@@ -89,7 +95,7 @@ export class board {
         draw.Board(this.board, {w: w, h: h}, ctx, this.selectedPiece);
     }
     onclick(x, y) {
-        if(this.selectedPiece == null) {
+        if(this.selectedPiece == null && !this.promotingVals.promoting) {
             const sqaure = this.findSquare(x, y);
             const piece = this.board[sqaure.col][sqaure.row];
             if(piece != 0) {
@@ -100,6 +106,19 @@ export class board {
                     col: sqaure.col,
                     id: piece,
                     moves: Piece.getMoves(piece, sqaure.row, sqaure.col, this.board, this.lastMove, this.castlingValues)
+                }
+            }
+        }
+        else if(this.promotingVals.promoting == true) {            
+            const sqaure = this.findSquare(x, y);
+            if(this.promotingVals.row == sqaure.row) {
+                const h = this.h/this.cols;
+                if(Math.abs(sqaure.col - this.promotingVals.col) < this.promotingVals.pieceId.length) {
+                    this.board[this.promotingVals.col][this.promotingVals.row] = this.promotingVals.pieceId[Math.abs(sqaure.col - this.promotingVals.col)];
+                    this.promotingVals = {
+                        promoting: false,
+                    }
+                    //move piece
                 }
             }
         }
@@ -116,6 +135,10 @@ export class board {
                     row: sqaure.row,
                     col: sqaure.col,
                 };
+                this.board[this.selectedPiece.col][this.selectedPiece.row] = 0;
+                this.board[sqaure.col][sqaure.row] = this.selectedPiece.id;
+                this.selectedPiece.newrow = sqaure.row;
+                this.selectedPiece.newcol = sqaure.col;
                 if(move.extra != null) {
                     if(move.extra.type == "move") {
                         this.board[move.extra.moveCol][move.extra.moveRow] = this.board[move.extra.col][move.extra.row];
@@ -124,12 +147,16 @@ export class board {
                     else if(move.extra.type == "take") {
                         this.board[move.extra.col][move.extra.row] = 0;
                     }
-                    console.log(move.extra)
+                    else if(move.extra.type == "promote") {
+                        this.promotingVals = {
+                            promoting: true,
+                            pieceId: [5 * move.extra.pieceColor, 2  * move.extra.pieceColor, 4  * move.extra.pieceColor, 3  * move.extra.pieceColor],
+                            color: "rgba(255, 255, 255, 0.9)",
+                            row: sqaure.row,
+                            col: sqaure.col,
+                        }
+                    }
                 }
-                this.board[this.selectedPiece.col][this.selectedPiece.row] = 0;
-                this.board[sqaure.col][sqaure.row] = this.selectedPiece.id;
-                this.selectedPiece.newrow = sqaure.row;
-                this.selectedPiece.newcol = sqaure.col;
                 if(Math.abs(this.selectedPiece.id) == this.findPieceId("king")) {
                     const vals = (this.selectedPiece.id > 0) ? this.castlingValues["white"] : this.castlingValues["black"];
                     for (let i = 0; i < vals.length; i++) {

@@ -101,16 +101,3 @@ export const pieces = [
         image: document.querySelector("#blackKing"),
     },
 ]
-
-const board = [
-    [0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0],
-    [-1, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0],
-    [0, -3, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 1, 0, 0, 0],
-    [0, 0, 0, 6, 0, 0, 0, 0],
-]
-
-console.log(moves.legalMove(1, {row: 4, col: 6}, {row: 4, col: 5}, board));

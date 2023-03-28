@@ -9,18 +9,33 @@ export class moves {
         const pawnvals = this.pawnData(dir, b.rows, b.cols);
         var moves = [];
         if(board[col - dir][row] == 0) {
-            this.addMove(moves, dir, {row: row, col: col}, {row: row, col: col - dir}, board);
+            if(col - dir == pawnvals.queenCol) {
+                this.addMove(moves, dir, {row: row, col: col}, {row: row, col: col - dir, extra: {type: "promote", pieceColor: dir}}, board);
+            }
+            else {
+                this.addMove(moves, dir, {row: row, col: col}, {row: row, col: col - dir}, board);
+            }
             if(col == pawnvals.startCol && board[col - dir * 2][row] == 0) {
                 this.addMove(moves, dir, {row: row, col: col}, {row: row, col: col - dir * 2}, board);
             }
         }
         let s = board[col - dir][row - 1];
         if(s != 0 && this.oppoSide(dir, s)) {
-            this.addMove(moves, dir, {row: row, col: col}, {row: row - 1, col: col - dir}, board);
+            if(col - dir == pawnvals.queenCol) {
+                this.addMove(moves, dir, {row: row, col: col}, {row: row - 1, col: col - dir, extra: {type: "promote", pieceColor: dir}}, board);
+            }
+            else {
+                this.addMove(moves, dir, {row: row, col: col}, {row: row - 1, col: col - dir}, board);
+            }
         }
         s = board[col - dir][row + 1];
         if(s != 0 && this.oppoSide(dir, s)) {
-            this.addMove(moves, dir, {row: row, col: col}, {row: row + 1, col: col - dir}, board);
+            if(col - dir == pawnvals.queenCol) {
+                this.addMove(moves, dir, {row: row, col: col}, {row: row + 1, col: col - dir, extra: {type: "promote", pieceColor: dir}}, board);
+            }
+            else {
+                this.addMove(moves, dir, {row: row, col: col}, {row: row + 1, col: col - dir}, board);
+            }
         }
         s = board[col][row - 1];
 
@@ -129,7 +144,6 @@ export class moves {
                 this.addMove(moves, id, {row: row, col: col}, {row: row - 2, col: col, extra: {type: "move", row: row - 4, col: col, moveRow: row - 1, moveCol: col}}, board);
             }
         }
-        console.log(castlingVals)
         return moves;
     }
     static kingOrRookMoved(id, row, col, castlingVals) {
@@ -188,7 +202,7 @@ export class moves {
         board[move.col][move.row] = id;
         board[curpos.col][curpos.row] = 0;
         if(move.extra != null) {
-            if(move.type = "take") {
+            if(move.extra.type == "take") {
                 var extraTake = board[move.extra.col][move.extra.row];
                 board[move.extra.col][move.extra.row] = 0;
             }

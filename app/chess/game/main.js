@@ -13,7 +13,16 @@ const defaultSetup = [
   [1, 1, 1, 1, 1, 1, 1, 1],
   [4, 2, 3, 5, 6, 3, 2, 4]
 ]
-
+const pawnSetup = [
+  [0, 0, 0, 0, 0, 0, 0, -6],
+  [1, 6, 0, 0, 0, 0, 0, 0],
+  [0, 0, 0, 0, 0, 0, 0, 0],
+  [0, 0, 0, 0, 0, 0, 0, 0],
+  [0, 0, 0, 0, 0, 0, 0, 0],
+  [0, 0, 0, 0, 0, 0, 0, 0],
+  [0, 0, 0, 0, 0, 0, 0, -1],
+  [0, 0, 0, 0, 0, 0, 0, 0],
+]
 
 var board1 = new board(8, 8, "tan", "brown", defaultSetup);
 board1.update(canvas, ctx, window.innerWidth, window.innerHeight);
