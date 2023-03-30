@@ -1,6 +1,7 @@
 import {board} from "./components/board.js";
 // import {chess} from "./game.js";
 
+var chatBox = document.querySelector('.chatBox');
 var canvas = document.querySelector('canvas');
 var ctx = canvas.getContext("2d");
 const defaultSetup = [
@@ -25,14 +26,19 @@ const pawnSetup = [
 ]
 
 var board1 = new board(8, 8, "tan", "brown", defaultSetup);
-board1.update(canvas, ctx, window.innerWidth, window.innerHeight);
 
 // var game = new chess(new board(8, 8, "tan", "brown", defaultSetup), [0, 1]);
 
 function UpdateBoard() {
   const x = mouse.x - parseInt(canvas.style.left);
   const y = mouse.y - parseInt(canvas.style.top);
-  board1.update(canvas, ctx, window.innerWidth, window.innerHeight, x, y);
+  board1.update(canvas, ctx, window.innerWidth - canvas.width/3, window.innerHeight, x, y);
+  console.log(canvas.height)
+  chatBox.style.left = parseInt(canvas.style.left) + parseInt(canvas.width) + "px";
+  chatBox.style.top = canvas.style.top;
+  chatBox.style.height = canvas.height + "px";
+  chatBox.style.width = canvas.width/3 + "px";
+
 }
 
 setInterval(UpdateBoard, 1000/60);

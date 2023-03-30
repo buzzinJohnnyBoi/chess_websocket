@@ -2,24 +2,15 @@
 <html>
 <head>
 	<title>Chess</title>
-	<style>
-		* {
-			margin: 0;
-			padding: 0;
-		}
-		img {
-			width: 50px;
-            display: none;
-		}
-        canvas {
-            position: absolute;
-        }
-	</style>
+	<link rel="stylesheet" href="style.css">
     <script src="https://cdn.socket.io/socket.io-3.0.0.js"></script>
     <!-- <script type="module" defer src="app.js"></script> -->
 </head>
 <body oncontextmenu="rightclick(); return false">
-    <canvas></canvas>
+    <div class="game">
+        <canvas></canvas>
+        <div class="chatBox"></div>
+    </div>
     <img src="pieces/blackPawn.png" id="blackPawn">
     <img src="pieces/blackKnight.png" id="blackKnight">
     <img src="pieces/blackBishop.png" id="blackBishop">
@@ -33,6 +24,5 @@
     <img src="pieces/whiteQueen.png" id="whiteQueen">
     <img src="pieces/whiteKing.png" id="whiteKing">
 </body>
-<!-- <script type="module" src="game/components/mouse.js"></script> -->
 <script type="module" src="game/main.js"></script>
 </html>
