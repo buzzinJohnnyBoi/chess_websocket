@@ -1,11 +1,24 @@
 const socket = io('https://getdata.johntheguy.tk');
-socket.on('move', move => {
-    console.log(move)
-    // board1.board[move.col][move.row] = move.id;
-    board1.moveP(move.row, move.col, move.id, move.newrow, move.newcol)
-    console.log(board1)
+import handle from "./main.js";
+socket.on('chat', message => {
+    handle.chat(message.user, message.message);
+    // console.log(user)
+    console.log(message)
 });
 
-function move(selectedPiece) {
-    socket.emit('move', selectedPiece);
+socket.on('move', board => {
+    handle.move(board);
+});
+
+
+export default class actions {
+    static chat(user, message) {
+        socket.emit('chat', user, message);
+    }
+    static move(board) {
+        socket.emit('move', board);
+    }
 }
+// function move(selectedPiece) {
+//     console.log("asdfsad")
+// }

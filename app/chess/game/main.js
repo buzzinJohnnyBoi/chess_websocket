@@ -1,5 +1,31 @@
 import {board} from "./components/board.js";
+import chat from "./chat/chat.js";
+import actions from "./app.js";
 // import {chess} from "./game.js";
+
+const inputField = document.getElementById("input-field");
+const nameField = document.getElementById("name-field");
+
+inputField.addEventListener("keypress", function (event) {
+  if (event.key === "Enter") {
+    if (inputField.value.trim() !== '' && nameField.value.trim() !== '') {
+      actions.chat(nameField.value, inputField.value);
+      inputField.value = "";
+    }
+  }
+});
+
+export default class handle {
+  static chat(user, message) {
+    chat.createMessage(user, message, true);
+  }
+  static move(board) {
+    // board1.board[move.col][move.row] = move.id;
+
+    board1.setBoard(board);
+  }
+}
+
 
 var chatBox = document.querySelector('.chatBox');
 var canvas = document.querySelector('canvas');
@@ -25,6 +51,9 @@ const pawnSetup = [
   [0, 0, 0, 0, 0, 0, 0, 0],
 ]
 
+chat.createMessage("John", "John is cool", false);
+chat.createMessage("James", "Ya he is", true);
+
 var board1 = new board(8, 8, "tan", "brown", defaultSetup);
 
 // var game = new chess(new board(8, 8, "tan", "brown", defaultSetup), [0, 1]);
@@ -33,7 +62,6 @@ function UpdateBoard() {
   const x = mouse.x - parseInt(canvas.style.left);
   const y = mouse.y - parseInt(canvas.style.top);
   board1.update(canvas, ctx, window.innerWidth - canvas.width/3, window.innerHeight, x, y);
-  console.log(canvas.height)
   chatBox.style.left = parseInt(canvas.style.left) + parseInt(canvas.width) + "px";
   chatBox.style.top = canvas.style.top;
   chatBox.style.height = canvas.height + "px";
@@ -100,11 +128,11 @@ document.addEventListener("mouseup", MouseUp);
 document.addEventListener("mousedown", MouseDown);
 document.addEventListener("mousemove", MouseMove);
 
-const socket = io('https://getdata.johntheguy.tk');
+// const socket = io('https://getdata.johntheguy.tk');
 
-socket.on('move', move => {
-  console.log(move)
-  // board1.board[move.col][move.row] = move.id;
-  board1.moveP(move.row, move.col, move.id, move.newrow, move.newcol)
-  console.log(board1)
-});
+// socket.on('move', move => {
+//   console.log(move)
+//   // board1.board[move.col][move.row] = move.id;
+//   board1.moveP(move.row, move.col, move.id, move.newrow, move.newcol)
+//   console.log(board1)
+// });

@@ -11,9 +11,11 @@ const io = require('socket.io')(http, {
 io.on('connection', (socket) => {
     console.log('a user connected');
 
-    socket.on('move', (selectedPiece) =>     {
-        console.log(selectedPiece);
-        io.emit('move', selectedPiece);   
+    socket.on('move', (board) =>     {
+        io.emit('move', board);   
+    });
+    socket.on('chat', (user, message) =>     {
+        io.emit('chat', {user: user, message: message});   
     });
 });
 

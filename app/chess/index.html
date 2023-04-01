@@ -4,12 +4,21 @@
 	<title>Chess</title>
 	<link rel="stylesheet" href="style.css">
     <script src="https://cdn.socket.io/socket.io-3.0.0.js"></script>
-    <!-- <script type="module" defer src="app.js"></script> -->
+    <!-- <script type="module" defer src="./game/app.js"></script> -->
 </head>
 <body oncontextmenu="rightclick(); return false">
     <div class="game">
         <canvas></canvas>
-        <div class="chatBox"></div>
+        <div class="chatBox">
+            <div class="chat">
+                <ul>
+    
+                </ul>
+            </div>
+            <input type="text" id="input-field" placeholder="Message...">
+            <input type="text" id="name-field" placeholder="Your Name">
+            <!-- <textarea>John</textarea> -->
+        </div>
     </div>
     <img src="pieces/blackPawn.png" id="blackPawn">
     <img src="pieces/blackKnight.png" id="blackKnight">

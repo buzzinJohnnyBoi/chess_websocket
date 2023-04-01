@@ -1,6 +1,7 @@
 import {draw} from "./draw.js";
 import Piece from "./pieces.js";
 import {pieces} from "./pieces.js";
+import actions from "../app.js";
 
 export class board {
     constructor(rows, cols, color1, color2, setup) {
@@ -118,7 +119,7 @@ export class board {
                     this.promotingVals = {
                         promoting: false,
                     }
-                    //move piece
+                    actions.move(this.board);
                 }
             }
         }
@@ -176,7 +177,14 @@ export class board {
                         }
                     }
                 }
-                // move(this.selectedPiece);
+                if(move.extra != null) {
+                    if(move.extra.type != "promote") {
+                        actions.move(this.board);
+                    }
+                }
+                else {
+                    actions.move(this.board);
+                }
                 this.selectedPiece = null;
             }
             else {
@@ -192,9 +200,8 @@ export class board {
         }
         return false;
     }
-    moveP(row, col, id, newrow, newcol) {
-        // this.board[col][row] = 0;
-        // this.board[newcol][newrow] = id;
+    setBoard(board) {
+        this.board = board;
     }
     setBack() {
         if(this.selectedPiece != null) {
@@ -211,12 +218,12 @@ export class board {
     }
 }
 
-const socket = io('https://getdata.johntheguy.tk');
+// const socket = io('https://getdata.johntheguy.tk');
 
 
-function move(selectedPiece) {
-    socket.emit('move', selectedPiece);
-}
+// function move(selectedPiece) {
+//     socket.emit('move', selectedPiece);
+// }
 
 function clamp(min, max, val) {
     if(val < min ) return min;
