@@ -10,6 +10,9 @@ socket.on('move', board => {
     handle.move(board);
 });
 
+socket.on('color', color => {
+    handle.setColor(color);
+});
 
 export default class actions {
     static chat(user, message) {

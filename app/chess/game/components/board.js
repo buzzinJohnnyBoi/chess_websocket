@@ -13,6 +13,8 @@ export class board {
             color1,
             color2
         ];
+        this.color = null;
+        this.turn = false;
         this.board = setup;
         this.lastMove = null;
         this.selectedPiece = null;
@@ -96,18 +98,26 @@ export class board {
         draw.Board(this.board, {w: w, h: h}, ctx, this.selectedPiece);
     }
     onclick(x, y) {
-        if(this.selectedPiece == null && !this.promotingVals.promoting) {
+        if(this.selectedPiece == null && !this.promotingVals.promoting && this.turn == true) {
             const sqaure = this.findSquare(x, y);
             const piece = this.board[sqaure.col][sqaure.row];
-            if(piece != 0) {
+            if(piece != 0 && this.sameTeam(piece)) {
+                const p = (this.color == "white") ? {row: sqaure.row, col: sqaure.col} : this.reverseSquare(sqaure.row, sqaure.col);
                 this.selectedPiece = {
                     x: x - this.w/(2 * this.rows),
                     y: y - this.h/(2 * this.cols),
                     row: sqaure.row,
                     col: sqaure.col,
                     id: piece,
-                    moves: Piece.getMoves(piece, sqaure.row, sqaure.col, this.board, this.lastMove, this.castlingValues)
+                    moves: Piece.getMoves(piece, p.row, p.col, (this.color == "white") ? this.board : this.reverseBoard(), this.lastMove, this.castlingValues, this.color)
                 }
+                if(this.color != "white") {
+                    for (let i = 0; i < this.selectedPiece.moves.length; i++) {
+                        const move = this.selectedPiece.moves[i];
+                        this.reverseMove(move);
+                    }
+                }
+                // console.log(this.reverseBoard())
             }
         }
         else if(this.promotingVals.promoting == true) {            
@@ -119,22 +129,31 @@ export class board {
                     this.promotingVals = {
                         promoting: false,
                     }
-                    actions.move(this.board);
+                    actions.move((this.color == "white") ? this.board : this.reverseBoard());
+                    this.turn = false;
                 }
             }
         }
+    }
+    sameTeam(piece) {
+        if((piece < 0 && this.color == "black") || (piece > 0 && this.color == "white")) {
+            return true;
+        }
+        return false;
     }
     onrelease(x, y) {
         if(this.selectedPiece != null) {
             const sqaure = this.findSquare(x, y);
             const move = this.moveInMoves(sqaure.row, sqaure.col);
             if(move !== false) {
+                const org = (this.color == "white") ? {row: this.selectedPiece.row, col: this.selectedPiece.col} : this.reverseSquare(this.selectedPiece.row, this.selectedPiece.col);
+                const coord = (this.color == "white") ? {row: sqaure.row, col: sqaure.col} : this.reverseSquare(sqaure.row, sqaure.col);
                 this.lastMove = {
                     id: this.selectedPiece.id,
-                    orgRow: this.selectedPiece.row,
-                    orgCol: this.selectedPiece.col,
-                    row: sqaure.row,
-                    col: sqaure.col,
+                    orgRow: org.row,
+                    orgCol: org.col,
+                    row: coord.row,
+                    col: coord.col,
                 };
                 this.board[this.selectedPiece.col][this.selectedPiece.row] = 0;
                 this.board[sqaure.col][sqaure.row] = this.selectedPiece.id;
@@ -179,11 +198,13 @@ export class board {
                 }
                 if(move.extra != null) {
                     if(move.extra.type != "promote") {
-                        actions.move(this.board);
+                        this.turn = false;
+                        actions.move((this.color == "white") ? this.board : this.reverseBoard());
                     }
                 }
                 else {
-                    actions.move(this.board);
+                    this.turn = false;
+                    actions.move((this.color == "white") ? this.board : this.reverseBoard());
                 }
                 this.selectedPiece = null;
             }
@@ -201,7 +222,55 @@ export class board {
         return false;
     }
     setBoard(board) {
-        this.board = board;
+        this.board = (this.color == "white") ? board : this.reverseBoard(board);
+        this.turn = true;
+    }
+    setColor(color) {
+        this.color = color;
+        if(color == "black") {
+            this.board = this.reverseBoard();
+        }
+        else {
+            this.turn = true;
+        }
+    }
+    reverseBoard(board) {
+        const b = (board == null) ? this.board : board;
+        let newBoard = [
+            [],
+            [],
+            [],
+            [],
+            [],
+            [],
+            [],
+            []
+        ];
+        for (let i = b.length - 1; i >= 0; i--) {
+            for (let j = b[i].length - 1; j >= 0; j--) {
+                newBoard[7 - i].push(b[i][j]);                
+            }
+        }
+        return newBoard;
+    }
+    reverseSquare(row, col) {
+        return { row: (this.rows - 1) - row, col: (this.cols - 1) - col }
+    }
+    reverseMove(move) {
+        move.row = (this.rows - 1) - move.row, 
+        move.col = (this.cols - 1) - move.col;
+        if(move.extra != null) {
+            if(move.extra.type == "take") {
+                move.extra.row = (this.rows - 1) - move.extra.row, 
+                move.extra.col = (this.cols - 1) - move.extra.col;
+            }
+            else if(move.extra.type == "move") {
+                move.extra.row = (this.rows - 1) - move.extra.row, 
+                move.extra.col = (this.cols - 1) - move.extra.col;
+                move.extra.moveRow = (this.rows - 1) - move.extra.moveRow;
+                move.extra.moveCol = (this.cols - 1) - move.extra.moveCol;
+            }
+        }
     }
     setBack() {
         if(this.selectedPiece != null) {

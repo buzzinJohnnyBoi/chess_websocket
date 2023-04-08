@@ -1,27 +1,14 @@
-// const http = require('http');
-// const fs = require('fs');
 
-// http.createServer(function (req, res) {
-//     if(req.url == "/") {
-//         fs.readFile('index.html', function(err, data) {
-//             res.writeHead(200, {'Content-Type': 'text/html'});
-//             res.write(data);
-//             return res.end();
-//         });
-//     }
-//     if(req.url.includes == "/pieces") {
-//         fs.readFile('index.html', function(err, data) {
-//             res.writeHead(200, {'Content-Type': 'text/html'});
-//             res.write(data);
-//             return res.end();
-//         });
-//     }
-// }).listen(5500);
 const express = require("express");
 const app = express();
 
 // Serve the "index.html" file
 app.get("/", (req, res) => {
+  res.sendFile(__dirname + "/index2.html");
+});
+
+app.get('/:id', (req, res) => {
+  console.log(req.params.id);
   res.sendFile(__dirname + "/index.html");
 });
 

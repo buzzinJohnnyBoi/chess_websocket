@@ -24,6 +24,9 @@ export default class handle {
 
     board1.setBoard(board);
   }
+  static setColor(color) {
+    board1.setColor(color);
+  }
 }
 
 
@@ -51,8 +54,6 @@ const pawnSetup = [
   [0, 0, 0, 0, 0, 0, 0, 0],
 ]
 
-chat.createMessage("John", "John is cool", false);
-chat.createMessage("James", "Ya he is", true);
 
 var board1 = new board(8, 8, "tan", "brown", defaultSetup);
 
