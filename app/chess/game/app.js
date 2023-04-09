@@ -14,6 +14,7 @@ socket.on('color', color => {
     handle.setColor(color);
 });
 
+
 export default class actions {
     static chat(user, message) {
         socket.emit('chat', user, message);
@@ -22,6 +23,11 @@ export default class actions {
         socket.emit('move', board);
     }
 }
-// function move(selectedPiece) {
-//     console.log("asdfsad")
-// }
+const url = window.location.href;
+const parts = url.split('/');
+const gameId = parts[parts.length - 1];
+
+socket.emit('conn', gameId)
+
+
+console.log(gameId)
