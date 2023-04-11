@@ -4,7 +4,7 @@ const app = express();
 
 // Serve the "index.html" file
 app.get("/", (req, res) => {
-  res.sendFile(__dirname + "/index2.html");
+  res.sendFile(__dirname + "/mainpage.html");
 });
 
 app.get('/:id', (req, res) => {

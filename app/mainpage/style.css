@@ -1,0 +1,106 @@
+* {
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    background-color: rgb(71, 53, 53);
+}
+
+h1 {
+    text-align: center;
+    background-color: black;
+    color: white;
+    padding: 20px;
+}
+.content {
+    width: 80%;
+    margin: 0 auto;
+    background-color: rgb(71, 34, 65);
+    display: flex;
+    font-size: 20px;
+    height: calc(100vh - 80px);
+}
+h2 {
+    text-align: center;
+    padding: 10px;
+    background-color: rgb(27, 27, 36);
+    color: white;
+}
+
+li {
+    list-style: none;
+    /* padding: 10px;
+    border-bottom: 4px solid black;
+    padding-left: 70px;
+    transition: 0.2s; */
+}
+
+a {
+    display: inline-block;
+    padding-top : 15px;
+    padding-bottom: 15px;
+    border-bottom: 4px solid black;
+    padding-left: 50px;
+    transition: 0.2s;
+    text-decoration: none;
+    width: calc(100% - 50px);
+    color: rgb(56, 56, 168)
+}
+a:hover {
+    padding: 30px;
+    width: calc(100% - 60px);
+    cursor: pointer;
+    font-size: 22px;
+}
+  
+  .current-games {
+    flex: 1;
+    background-color: rgb(51, 32, 24);
+    border-right: 5px solid white;
+    overflow-y: auto;
+  }
+
+  .new-game {
+    flex: 1;
+    background-color: rgb(36, 36, 44);
+    overflow-y: auto;
+    color: rgb(166, 197, 202);
+  }
+
+  h3 {
+    padding: 10px;
+    font-size: 30px;
+    color: rgb(36, 36, 255);
+  }
+
+  button {
+    font-size: 20px;
+    padding: 10px;
+    margin: 10px;
+    transition: 0.2s;
+    border-radius: 10px;
+  }
+  button:hover {
+    cursor: pointer;
+  }
+
+  select {
+    display: block;
+    padding: 10px;
+    margin: 10px;
+    font-size: 20px;
+    border-radius: 10px;
+    background-color: black;
+    color: silver;
+  }
+
+#idInput {
+    display: block;
+    font-size: 20px;
+    margin: 10px;
+    padding: 10px;
+    background-color: black;
+    color: silver;
+    border-radius: 10px;
+}

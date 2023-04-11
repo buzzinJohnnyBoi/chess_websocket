@@ -6,8 +6,8 @@ socket.on('chat', message => {
     console.log(message)
 });
 
-socket.on('move', board => {
-    handle.move(board);
+socket.on('move', (move) => {
+    handle.move(move);
 });
 
 socket.on('color', color => {
@@ -19,8 +19,8 @@ export default class actions {
     static chat(user, message) {
         socket.emit('chat', user, message);
     }
-    static move(board) {
-        socket.emit('move', board);
+    static move(move, board) {
+        socket.emit('move', move, board);
     }
 }
 const url = window.location.href;

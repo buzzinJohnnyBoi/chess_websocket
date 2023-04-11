@@ -10,6 +10,7 @@ inputField.addEventListener("keypress", function (event) {
   if (event.key === "Enter") {
     if (inputField.value.trim() !== '' && nameField.value.trim() !== '') {
       actions.chat(nameField.value, inputField.value);
+      chat.createMessage("You", inputField.value, true);
       inputField.value = "";
     }
   }
@@ -17,12 +18,12 @@ inputField.addEventListener("keypress", function (event) {
 
 export default class handle {
   static chat(user, message) {
-    chat.createMessage(user, message, true);
+    chat.createMessage(user, message, false);
   }
-  static move(board) {
+  static move(move) {
     // board1.board[move.col][move.row] = move.id;
 
-    board1.setBoard(board);
+    board1.oppoMove(move);
   }
   static setColor(color) {
     board1.setColor(color);

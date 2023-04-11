@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.socket.io/socket.io-3.0.0.js"></script>
+    <title>Multi-player chess</title>
+</head>
+<body>
+    <h1>Multi-player socket io Chess game</h1>
+    <div class="content">
+        <div class="current-games">
+            <h2>Current Games</h2>
+            <ul id="CG">
+
+            </ul>
+        </div>
+        <div class="new-game">
+            <h2>Create New Game</h2>
+            <h3>Color: </h3>
+            <select id="color">
+                <option value="white">White</option>
+                <option value="black">Black</option>
+            </select>
+            <h3>Visibility: </h3>
+            <select id="public">
+                <option value="private">Play game with anyone (will be listed on the left)</option>
+                <option value="public">Play game only with person with link</option>
+            </select>
+            <h3>Custom Game Id (optional):</h3>
+            <input type="text" oninput="this.value=this.value.replace(/[^a-zA-Z0-9]/g,'');" id="idInput" placeholder="only numbers and letters">
+            <div class="available"></div>
+            <button onclick="createGame()">Create Game</button>
+        </div>
+    </div>
+</body>
+<script src="main.js"></script>
+</html>

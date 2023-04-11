@@ -126,10 +126,21 @@ export class board {
                 const h = this.h/this.cols;
                 if(Math.abs(sqaure.col - this.promotingVals.col) < this.promotingVals.pieceId.length) {
                     this.board[this.promotingVals.col][this.promotingVals.row] = this.promotingVals.pieceId[Math.abs(sqaure.col - this.promotingVals.col)];
+                    const org = (this.color == "white") ? {row: this.promotingVals.orgRow, col: this.promotingVals.orgCol} : this.reverseSquare(this.promotingVals.orgRow, this.promotingVals.orgCol);
+                    const coord = (this.color == "white") ? {row: this.promotingVals.row, col: this.promotingVals.col} : this.reverseSquare(this.promotingVals.row, this.promotingVals.col);
+
+                    const serverMove = {
+                        id: this.promotingVals.pieceId[Math.abs(sqaure.col - this.promotingVals.col)],
+                        orgRow: org.row,
+                        orgCol: org.col,
+                        row: coord.row,
+                        col: coord.col,
+                        extra: null
+                    }
                     this.promotingVals = {
                         promoting: false,
                     }
-                    actions.move((this.color == "white") ? this.board : this.reverseBoard());
+                    actions.move(serverMove, this.board);
                     this.turn = false;
                 }
             }
@@ -145,6 +156,7 @@ export class board {
         if(this.selectedPiece != null) {
             const sqaure = this.findSquare(x, y);
             const move = this.moveInMoves(sqaure.row, sqaure.col);
+            console.log(move)
             if(move !== false) {
                 const org = (this.color == "white") ? {row: this.selectedPiece.row, col: this.selectedPiece.col} : this.reverseSquare(this.selectedPiece.row, this.selectedPiece.col);
                 const coord = (this.color == "white") ? {row: sqaure.row, col: sqaure.col} : this.reverseSquare(sqaure.row, sqaure.col);
@@ -155,6 +167,14 @@ export class board {
                     row: coord.row,
                     col: coord.col,
                 };
+                var serverMove = {
+                    id: this.selectedPiece.id,
+                    orgRow: org.row,
+                    orgCol: org.col,
+                    row: coord.row,
+                    col: coord.col,
+                    extra: move.extra
+                }
                 this.board[this.selectedPiece.col][this.selectedPiece.row] = 0;
                 this.board[sqaure.col][sqaure.row] = this.selectedPiece.id;
                 this.selectedPiece.newrow = sqaure.row;
@@ -174,6 +194,8 @@ export class board {
                             color: "rgba(255, 255, 255, 0.9)",
                             row: sqaure.row,
                             col: sqaure.col,
+                            orgRow: this.selectedPiece.row,
+                            orgCol: this.selectedPiece.col,
                         }
                     }
                 }
@@ -199,12 +221,14 @@ export class board {
                 if(move.extra != null) {
                     if(move.extra.type != "promote") {
                         this.turn = false;
-                        actions.move((this.color == "white") ? this.board : this.reverseBoard());
+                        console.log(serverMove)
+                        actions.move(serverMove, this.board);
                     }
                 }
                 else {
                     this.turn = false;
-                    actions.move((this.color == "white") ? this.board : this.reverseBoard());
+                    console.log(serverMove)
+                    actions.move(serverMove, this.board);
                 }
                 this.selectedPiece = null;
             }
@@ -223,6 +247,31 @@ export class board {
     }
     setBoard(board) {
         this.board = (this.color == "white") ? board : this.reverseBoard(board);
+        this.turn = true;
+    }
+    oppoMove(move) {
+        const org = (this.color == "white") ? {row: move.orgRow, col: move.orgCol} : this.reverseSquare(move.orgRow, move.orgCol);
+        const coord = (this.color == "white") ? {row: move.row, col: move.col} : this.reverseSquare(move.row, move.col);
+        this.lastMove = {
+            id: move.id,
+            orgRow: move.orgRow,
+            orgCol: move.orgCol,
+            row: move.row,
+            col: move.col,
+        };
+        this.board[org.col][org.row] = 0;
+        this.board[coord.col][coord.row] = move.id;
+        if(move.extra != null) {
+            const extraMove = this.reverseExtra(move);
+            console.log(extraMove)
+            if(move.extra.type == "move") {
+                this.board[extraMove.moveCol][extraMove.moveRow] = this.board[extraMove.col][extraMove.row];
+                this.board[extraMove.col][extraMove.row] = 0;
+            }
+            else if(move.extra.type == "take") {
+                this.board[extraMove.col][extraMove.row] = 0;
+            }
+        }
         this.turn = true;
     }
     setColor(color) {
@@ -271,6 +320,22 @@ export class board {
                 move.extra.moveCol = (this.cols - 1) - move.extra.moveCol;
             }
         }
+    }
+    reverseExtra(move) {
+        var extra = {
+
+        }
+        if(move.extra.type == "take") {
+            extra.row = (this.rows - 1) - move.extra.row, 
+            extra.col = (this.cols - 1) - move.extra.col;
+        }
+        else if(move.extra.type == "move") {
+            extra.row = (this.rows - 1) - move.extra.row, 
+            extra.col = (this.cols - 1) - move.extra.col;
+            extra.moveRow = (this.rows - 1) - move.extra.moveRow;
+            extra.moveCol = (this.cols - 1) - move.extra.moveCol;
+        }
+        return extra;
     }
     setBack() {
         if(this.selectedPiece != null) {
