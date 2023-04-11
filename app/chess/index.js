@@ -3,8 +3,21 @@ const express = require("express");
 const app = express();
 
 // Serve the "index.html" file
-app.get("/", (req, res) => {
-  res.sendFile(__dirname + "/mainpage.html");
+const path = require('path');
+
+app.get('/', (req, res) => {
+  const filePath = path.join(__dirname, '../mainpage/index.html');
+  res.sendFile(filePath);
+});
+
+app.get('/style.css', (req, res) => {
+  const filePath = path.join(__dirname, '../mainpage/style.css');
+  res.sendFile(filePath);
+});
+
+app.get('/main.js', (req, res) => {
+  const filePath = path.join(__dirname, '../mainpage/main.js');
+  res.sendFile(filePath);
 });
 
 app.get('/:id', (req, res) => {

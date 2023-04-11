@@ -1,4 +1,5 @@
 const http = require('http').createServer();
+const fs = require('fs');
 
 const io = require('socket.io')(http, {
     cors: { origin: "*" }
@@ -8,10 +9,46 @@ const io = require('socket.io')(http, {
     // }
 });
 
+
+class UpdateData {
+    updateNumGames() {
+        fs.readFile('data.json', 'utf8', (err, data) => {
+          if (err) {
+            console.error(err);
+            return;
+          }
+          const jsonData = JSON.parse(data);
+          const newNumGames = jsonData.numgames + 1;
+          jsonData.numgames = newNumGames;
+          fs.writeFile('data.json', JSON.stringify(jsonData), 'utf8', (err) => {
+            if (err) {
+              console.error(err);
+              return;
+            }
+          });
+        });
+    }
+    readNumGames(callback) {
+        fs.readFile('data.json', 'utf8', (err, data) => {
+            if (err) {
+              console.error(err);
+              return;
+            }
+            const jsonData = JSON.parse(data);
+            callback(jsonData.numgames);
+        });
+    }
+}
+
+const updateData = new UpdateData();
+var numGamesEver = 0;
+updateData.readNumGames((numGamesEver) => {
+    numGamesEver = 0;
+});
+
 var users = {
-    // 1234: {white: null, black: null, spectators: []}
+
 };
-// io.of('/1234').on('connection', function(socket) {
 io.on('connection', function(socket) {
     socket.on('getVals', () => {
         const vals = getVals();
@@ -23,43 +60,88 @@ io.on('connection', function(socket) {
         io.to(oppoId).emit('move', move);
         users[game].board = board;
         users[game].lastMove = move;
+        if(users[game].spectators.length > 0) {
+            for (let i = 0; i < users[game].spectators.length; i++) {
+                const user = users[game].spectators[i];
+                io.to(user).emit('spectatorBoard', board, (users[game].white == socket.id) ? "white" : "black");
+            }
+        }
     });
     socket.on('chat', (user, message) =>     {
-        const oppoId = findOppoId(findGameId(socket.id), socket.id);
-        io.to(oppoId).emit('chat', {user: user, message: message});   
+        const game = findGameId(socket.id);
+        if(game != null) {
+            const oppoId = findOppoId(game, socket.id);
+            io.to(oppoId).emit('chat', {user: user, message: message});   
+        }
     });
 
-    socket.on('createGame', (id) => {
+    socket.on('createGame', (id, color, type) => {
         if(id != "") {
-            io.to(socket.id).emit('createGame', {taken: checkId(id), id: id});
+            const gameIdTaken = checkId(id);
+            if(!gameIdTaken) {
+                if(newGame(id, color, type)) {
+                    io.to(socket.id).emit('createGame', {taken: false, id: id});
+                    updateData.updateNumGames();
+                    numGamesEver++;
+                }
+            }
+            else {
+                io.to(socket.id).emit('createGame', {taken: true, id: id});
+            }
         }
         else {
-            io.to(socket.id).emit('createGame', {taken: false, id: findNewId()});
+            const gameId = findNewId();
+            if(newGame(gameId, color, type)) {
+                io.to(socket.id).emit('createGame', {taken: false, id: gameId});
+                updateData.updateNumGames();
+                numGamesEver++;
+            }
         }
+        console.log(users[id]);
     });
     socket.on('conn', (id) =>     {
-        if(users[id] == null) {
-            newGame(id);
-            users[id].white = socket.id;
-            io.to(socket.id).emit('color', 'white');
-            console.log("john")
-
-        }
-        else {
-            users[id].black = socket.id;
-            io.to(socket.id).emit('color', 'black');
-            const game = findGameId(socket.id);
-            const oppoId = findOppoId(game, socket.id);
-            io.to(oppoId).emit('chat', {user: "server", message: "black user connected"});   
-            
-            if(users[game].lastMove != null) {
-                io.to(socket.id).emit('move', users[game].lastMove);
+        if(users[id] != null) {
+            if(users[id].white == null && users[id].black == null) {
+                if(users[id].firstJoin == "white") {
+                    users[id].white = socket.id;
+                    io.to(socket.id).emit('color', 'white');
+                }
+                else {
+                    users[id].black = socket.id;
+                    io.to(socket.id).emit('color', 'black');
+                }
+                const vals = getVals();
+                io.emit('getVals', vals);
             }
-            // if(users[game].black == socket.id) {
-            // }
-            // else if(users[game].white == socket.id) {
-            //     io.to(oppoId).emit('chat', {user: "server", message: "white user connected"});   
-            // }
+            else if (users[id].white == null || users[id].black == null) {
+                // say something about the chat
+                if(users[id].white == null) {
+                    users[id].white = socket.id;
+                    io.to(socket.id).emit('color', 'white');
+                }
+                else {
+                    users[id].black = socket.id;
+                    io.to(socket.id).emit('color', 'black');
+                }
+                const game = findGameId(socket.id);
+
+                const oppoId = findOppoId(game, socket.id);
+                io.to(oppoId).emit('chat', {user: "server", message: "Your opponent has connected"});   
+
+                if(users[game].lastMove != null) {
+                    io.to(socket.id).emit('move', users[game].lastMove);
+                }
+                const vals = getVals();
+                io.emit('getVals', vals);
+            }
+            else {
+                users[id].spectators.push(socket.id);
+                if(users[id].board != null) {
+                    io.to(socket.id).emit('spectatorBoard', users[id].board, (users[id].lastMove.id > 0) ? "white" : "black");
+                }
+                io.to(users[id].white).emit('chat', { user: "server", message: "Spectator #" + users[id].spectators.length +" is watching"});
+                io.to(users[id].black).emit('chat', { user: "server", message: "Spectator #" + users[id].spectators.length +" is watching"});
+            }
         }
     });
     socket.on('disconnect', function() {
@@ -69,16 +151,30 @@ io.on('connection', function(socket) {
             const oppoId = findOppoId(game, socket.id);
             if(users[game].black == socket.id) {
                 io.to(oppoId).emit('chat', {user: "server", message: "black user disconnected"});   
+                users[game].black = null;
             }
             else if(users[game].white == socket.id) {
                 io.to(oppoId).emit('chat', {user: "server", message: "white user disconnected"});   
+                users[game].white = null;
             }
+            if(users[game].white == null && users[game].black == null) {
+                delete users[game];
+                const vals = getVals();
+                io.emit('getVals', vals);
+            }
+        }
+        else {
+            deleteSpec(socket.id);
         }
     });
 });
 
-function newGame(id) {
-    users[id] = {white: null, black: null, board: null, lastMove: null, spectators: []};
+function newGame(id, firstJoin, type) {
+    if(users[id] == null) {
+        users[id] = {type: type, firstJoin: firstJoin, white: null, black: null, board: null, lastMove: null, spectators: []};
+        return true;
+    }
+    return false;
 }
 function findGameId(id) {
     for (var game in users) { 
@@ -97,6 +193,18 @@ function findOppoId(game, id) {
     }
 }
 
+function deleteSpec(id) {
+    for (var game in users) { 
+        for (let i = 0; i < users[game].spectators.length; i++) {
+            const user = users[game].spectators[i];
+            if(id == user) {
+                users[game].spectators.splice(i, 1);
+                return ;
+            }
+        }
+    }
+}
+
 function findNewId() {
     var i = 0;
     while(users[i] != null) {
@@ -106,10 +214,10 @@ function findNewId() {
 }
 
 function checkId(id) {
-    if(users[id] == null) {
-        return false;
+    if (users[id] == null && users[String(parseInt(id))] == null) {
+      return false;
     }
-    return false;
+    return true;
 }
 
 function getVals() {
@@ -119,15 +227,19 @@ function getVals() {
     }
     else {
         for (var id in users) {
-            currentGames.push({
-                open: (users[id].white != null && users[id].black != null) ? false : true,
-                link: id,
-            });
+            if(users[id].type == "public") {
+                currentGames.push({
+                    open: (users[id].white != null && users[id].black != null) ? false : true,
+                    link: id,
+                });
+            }
         }
     }
     return {
-        currentGames: currentGames
+        currentGames: currentGames,
+        totalGames: numGamesEver
     }
 }
+
 
 http.listen(8080, () => console.log('listening on http://localhost:8080') );

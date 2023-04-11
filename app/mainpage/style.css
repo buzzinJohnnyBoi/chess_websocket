@@ -104,3 +104,9 @@ a:hover {
     color: silver;
     border-radius: 10px;
 }
+
+.available {
+  font-size: 20px;
+  margin-left: 20px;
+  color: red;
+}

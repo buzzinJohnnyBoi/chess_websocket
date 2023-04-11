@@ -28,6 +28,9 @@ export default class handle {
   static setColor(color) {
     board1.setColor(color);
   }
+  static setSpecBoard(board, color) {
+    board1.setBoard(board, color);
+  }
 }
 
 

@@ -14,6 +14,9 @@ socket.on('color', color => {
     handle.setColor(color);
 });
 
+socket.on('spectatorBoard', (board, color) => {
+    handle.setSpecBoard(board, color);
+});
 
 export default class actions {
     static chat(user, message) {

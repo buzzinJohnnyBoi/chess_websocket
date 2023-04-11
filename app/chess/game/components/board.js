@@ -17,6 +17,12 @@ export class board {
         this.turn = false;
         this.board = setup;
         this.lastMove = null;
+        this.lastMoveHighlight = {
+            org: [null, null],
+            move: [null, null],
+            "white": "rgba(50, 50, 50, 0.9)",
+            "black": "rgba(150, 150, 150, 0.9)",
+        };
         this.selectedPiece = null;
         this.castlingValues = this.castlingVals(setup);
         this.promotingVals = {
@@ -93,6 +99,14 @@ export class board {
             for (let j = 0; j < this.cols; j++) {
                 ctx.fillStyle = this.squareColors[(i + j) % 2];
                 ctx.fillRect(i * w, j * h, w, h);      
+                if(this.lastMoveHighlight.org[0] == j && this.lastMoveHighlight.org[1] == i) {
+                    ctx.fillStyle = this.lastMoveHighlight[(this.lastMove.id > 0) ? "black" : "white"];
+                    ctx.fillRect(i * w, j * h, w, h);   
+                }
+                if(this.lastMoveHighlight.move[0] == j && this.lastMoveHighlight.move[1] == i) {
+                    ctx.fillStyle = this.lastMoveHighlight[(this.lastMove.id > 0) ? "black" : "white"];
+                    ctx.fillRect(i * w, j * h, w, h);   
+                }
             }
         }
         draw.Board(this.board, {w: w, h: h}, ctx, this.selectedPiece);
@@ -167,6 +181,8 @@ export class board {
                     row: coord.row,
                     col: coord.col,
                 };
+                this.lastMoveHighlight.org = [this.selectedPiece.col, this.selectedPiece.row];
+                this.lastMoveHighlight.move = [sqaure.col, sqaure.row];
                 var serverMove = {
                     id: this.selectedPiece.id,
                     orgRow: org.row,
@@ -245,9 +261,10 @@ export class board {
         }
         return false;
     }
-    setBoard(board) {
-        this.board = (this.color == "white") ? board : this.reverseBoard(board);
-        this.turn = true;
+    setBoard(board, color) {
+        if(this.color == null) {
+            this.board = ("white" == color) ? board : this.reverseBoard(board);
+        }
     }
     oppoMove(move) {
         const org = (this.color == "white") ? {row: move.orgRow, col: move.orgCol} : this.reverseSquare(move.orgRow, move.orgCol);
@@ -259,6 +276,8 @@ export class board {
             row: move.row,
             col: move.col,
         };
+        this.lastMoveHighlight.org = [org.col, org.row];
+        this.lastMoveHighlight.move = [coord.col, coord.row];
         this.board[org.col][org.row] = 0;
         this.board[coord.col][coord.row] = move.id;
         if(move.extra != null) {

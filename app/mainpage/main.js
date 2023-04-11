@@ -3,7 +3,7 @@ const socket = io('https://getdata.johntheguy.tk');
 socket.emit('getVals');
 
 socket.on('getVals', (object) => {
-    loadInVals(object)
+    loadInVals(object);
 });
 
 function loadInVals(object) {
@@ -25,16 +25,18 @@ function loadInVals(object) {
       el.appendChild(link);
       document.querySelector('#CG').appendChild(el);
     }
+    console.log("Hello from the console, just know this game is very easy to hack, so good luck with that.");
+    console.log("Also, I don't put this on the page because it is a embarrassingly low number, but there are " + object.totalGames + " games ever played on this site.");
 }
 
 const input = document.querySelector("#idInput");
 const color = document.querySelector("#color");
 const visiblity = document.querySelector("#public");
 const taken = document.querySelector(".available");
+
 function createGame() {
     const id = input.value;
-    console.log(id)
-    socket.emit('createGame', id);
+    socket.emit('createGame', id, color.value, visiblity.value);
 }
 
 socket.on('createGame', (object) => {
@@ -42,6 +44,7 @@ socket.on('createGame', (object) => {
         taken.innerHTML = "id is already claimed";
     }
     else {
-        
+        console.log("id created")
+        window.location.href = "/" + object.id;
     }
 });
