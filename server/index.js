@@ -97,7 +97,6 @@ io.on('connection', function(socket) {
                 numGamesEver++;
             }
         }
-        console.log(users[id]);
     });
     socket.on('conn', (id) =>     {
         if(users[id] != null) {
@@ -145,7 +144,6 @@ io.on('connection', function(socket) {
         }
     });
     socket.on('disconnect', function() {
-        console.log('Client disconnected with ID:', socket.id);
         const game = findGameId(socket.id);
         if(game != null) {
             const oppoId = findOppoId(game, socket.id);

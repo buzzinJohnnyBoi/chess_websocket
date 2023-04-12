@@ -44,7 +44,6 @@ socket.on('createGame', (object) => {
         taken.innerHTML = "id is already claimed";
     }
     else {
-        console.log("id created")
         window.location.href = "/" + object.id;
     }
 });
